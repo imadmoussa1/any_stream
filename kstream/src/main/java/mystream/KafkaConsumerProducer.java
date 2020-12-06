@@ -16,19 +16,19 @@ package mystream;
  * limitations under the License.
  */
 
+import mystream.twitter.TwitterProducer;
 import org.apache.kafka.common.errors.TimeoutException;
 
 
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 
-public class KafkaConsumerProducerDemo {
+public class KafkaConsumerProducer {
   public static void main(String[] args) throws InterruptedException {
     boolean isAsync = true;
     CountDownLatch latch = new CountDownLatch(2);
-    TwitterProducer producerThread = new TwitterProducer("sample_stream", isAsync, null, false, 10000, latch);
+    TwitterProducer producerThread = new TwitterProducer("sample_stream", isAsync, null, false, 10000, latch, null);
     producerThread.start();
 
     // Consumer consumerThread = new TwitterConsumer(KafkaProperties.TOPIC, "DemoConsumer", Optional.empty(), false, 10000, latch);

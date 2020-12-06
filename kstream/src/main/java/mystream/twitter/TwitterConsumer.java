@@ -14,7 +14,7 @@
 // * See the License for the specific language governing permissions and
 // * limitations under the License.
 // */
-package mystream;
+package mystream.twitter;
 
 import mystream.KafkaProperties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -37,11 +37,11 @@ public class TwitterConsumer {
   private final CountDownLatch latch;
 
   public TwitterConsumer(final String topic,
-                  final String groupId,
-                  final Optional<String> instanceId,
-                  final boolean readCommitted,
-                  final int numMessageToConsume,
-                  final CountDownLatch latch) {
+                         final String groupId,
+                         final Optional<String> instanceId,
+                         final boolean readCommitted,
+                         final int numMessageToConsume,
+                         final CountDownLatch latch) {
     this.groupId = groupId;
     Properties props = new Properties();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaProperties.KAFKA_SERVER_URL + ":" + KafkaProperties.KAFKA_SERVER_PORT);
