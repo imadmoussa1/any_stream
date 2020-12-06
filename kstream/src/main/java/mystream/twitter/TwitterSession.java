@@ -17,9 +17,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 public class TwitterSession {
@@ -53,7 +55,7 @@ public class TwitterSession {
     return httpClient;
   }
 
-  public HttpResponse responseTwitter() throws URISyntaxException, IOException {
+  public HttpEntity connectStream() throws URISyntaxException, IOException {
     URIBuilder uriBuilder = new URIBuilder();
     ArrayList<NameValuePair> queryParameters;
     queryParameters = new ArrayList<>();
@@ -79,25 +81,8 @@ public class TwitterSession {
     httpGet.setHeader("Content-Type", "application/json");
 
     HttpResponse response = this.getHttpClient().execute(httpGet);
-    return response;
-  }
-
-  public BufferedReader connectStream() throws IOException, URISyntaxException {
-    HttpEntity entity = this.responseTwitter().getEntity();
-    BufferedReader reader = null;
-    if (null != entity) {
-      reader = new BufferedReader(new InputStreamReader((entity.getContent())));
-    }
-    return reader;
-  }
-
-  public String search() throws IOException, URISyntaxException {
-    String searchResponse = null;
-    HttpEntity entity = this.responseTwitter().getEntity();
-    if (null != entity) {
-      searchResponse = EntityUtils.toString(entity, "UTF-8");
-    }
-    return searchResponse;
+    HttpEntity entity = response.getEntity();
+    return entity;
   }
 
   /*

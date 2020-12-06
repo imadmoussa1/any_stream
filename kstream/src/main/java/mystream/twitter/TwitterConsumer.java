@@ -21,6 +21,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -28,8 +29,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class TwitterConsumer {
-  private final KafkaConsumer<Integer, String> consumer;
+public class TwitterConsumer extends Thread{
+  private final KafkaConsumer<String, String> consumer;
   private final String topic;
   private final String groupId;
   private final int numMessageToConsume;
@@ -50,8 +51,8 @@ public class TwitterConsumer {
     props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
     props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
     props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerDeserializer");
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
     if (readCommitted) {
       props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
     }
@@ -64,7 +65,21 @@ public class TwitterConsumer {
     this.latch = latch;
   }
 
-  KafkaConsumer<Integer, String> get() {
+  KafkaConsumer<String, String> get() {
     return consumer;
+  }
+
+  @Override
+  public void run() {
+    consumer.subscribe(Collections.singletonList(this.topic));
+    ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(1));
+    for (ConsumerRecord<String, String> record : records) {
+      System.out.println(groupId + " received message : from partition " + record.partition() + ", (" + record.key() + ", " + record.value() + ") at offset " + record.offset());
+    }
+    messageRemaining -= records.count();
+    if (messageRemaining <= 0) {
+      System.out.println(groupId + " finished reading " + numMessageToConsume + " messages");
+      latch.countDown();
+    }
   }
 }
